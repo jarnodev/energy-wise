@@ -10,7 +10,9 @@ setupDevPlatform().catch(console.error);
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "https://energywise.jarnodev.com/api",
+  },
 };
 
 export default nextConfig;

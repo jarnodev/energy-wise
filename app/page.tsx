@@ -7,7 +7,7 @@ export const runtime = "edge";
 
 export default async function Home()
 {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://energywise.jarnodev.com/api";
 
   // FromDate defautl to 30 days ago, TillDate default to tomorrow
   const fromDate = new Date();
