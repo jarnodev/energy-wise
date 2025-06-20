@@ -3,6 +3,8 @@ import { ChartConfig } from "@/components/ui/chart";
 import { ThemeToggler } from "@/components/theme-toggler";
 import { Zap } from "lucide-react";
 
+export const runtime = "edge";
+
 export default async function Home()
 {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
