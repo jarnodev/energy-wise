@@ -20,6 +20,15 @@ async function fetchLocalApi(
 }
 
 export async function POST(req: NextRequest) {
+	// Disable this endpoint for now
+	return NextResponse.json(
+		{ error: 'This endpoint is temporarily disabled.' },
+		{
+			status: 503,
+			headers: { 'Content-Type': 'application/json' },
+		}
+	);
+
 	const {
 		fromDate,
 		tillDate,
