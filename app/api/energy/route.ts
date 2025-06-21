@@ -23,7 +23,7 @@ export const POST = async (req: NextRequest) => {
 		}
 
 		const url = `https://api.energyzero.nl/v1/energyprices?fromDate=${fromDate}T22%3A00%3A00.000Z&tillDate=${tillDate}T21%3A59%3A59.999Z&interval=${interval}&usageType=1&inclBtw=${vat}`;
-        console.log('Fetching energy prices from:', url);
+
 		const response = await fetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
