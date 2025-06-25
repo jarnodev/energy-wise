@@ -14,7 +14,7 @@ interface EnergyPrice {
 	price: number;
 }
 
-export const POST = async (req: NextRequest) => {
+export async function POST(req: NextRequest) {
 	try {
 		const { fromDate, tillDate, interval, vat } = (await req.json()) as RequestBody;
 
@@ -59,4 +59,4 @@ export const POST = async (req: NextRequest) => {
 		console.error('Error processing request:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
-};
+}

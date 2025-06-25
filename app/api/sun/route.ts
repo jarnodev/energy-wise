@@ -7,7 +7,7 @@ interface SunshineDuration {
 	duration: number;
 }
 
-export const GET = async () => {
+export async function GET() {
 	const pastHours = 30 * 24; // 30 days in hours
 
 	try {
@@ -51,4 +51,4 @@ export const GET = async () => {
 		console.error('Error processing request:', error);
 		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	}
-};
+}

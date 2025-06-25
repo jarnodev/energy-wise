@@ -5,6 +5,8 @@ import { Zap } from "lucide-react";
 
 export const runtime = "edge";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "";
+
 const defaultDates = () =>
 {
   const fromDate = new Date();
@@ -25,17 +27,17 @@ async function fetchChartData(fromDate: string, tillDate: string): Promise<{
 }>
 {
   const [energyPricesResponse, gasPricesResponse, sunResponse] = await Promise.all([
-    fetch('/api/energy', {
+    fetch(`${API_BASE_URL}/api/energy`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ fromDate, tillDate, interval: 4, vat: true }),
     }),
-    fetch('/api/gas', {
+    fetch(`${API_BASE_URL}/api/gas`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ fromDate, tillDate, interval: 4, vat: true }),
     }),
-    fetch('/api/sun', { method: "GET" }),
+    fetch(`${API_BASE_URL}/api/sun`, { method: "GET" }),
   ]);
 
   if (!energyPricesResponse.ok || !gasPricesResponse.ok || !sunResponse.ok) {

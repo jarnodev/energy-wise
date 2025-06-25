@@ -7,12 +7,6 @@ import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
 // https://github.com/cloudflare/next-on-pages/blob/main/internal-packages/next-dev/README.md
 setupDevPlatform().catch(console.error);
 
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "https://energywise.jarnodev.com/api",
-  },
-};
+const nextConfig = {};
 
 export default nextConfig;
