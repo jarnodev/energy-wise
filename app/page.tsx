@@ -1,6 +1,5 @@
 import ChartAreaInteractive from "@/components/chart-area-interactive";
 import { ChartConfig } from "@/components/ui/chart";
-import { ThemeToggler } from "@/components/theme-toggler";
 import { Zap } from "lucide-react";
 
 export const runtime = "edge";
@@ -61,13 +60,13 @@ function getEnergyGasChartConfig(): ChartConfig
 function renderHeader()
 {
   return (
-    <section className="relative flex flex-col items-start justify-center p-8 bg-white/30 backdrop-blur-md border-b border-white/30 shadow-lg rounded-b-3xl overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none z-0 bg-gradient-to-br from-blue-400/40 via-white/10 to-blue-700/30" />
+    <section className="relative flex flex-col items-start justify-center p-8 shadow-lg rounded-b-3xl overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none z-0 bg-gradient-to-br from-blue-400 to-blue-700" />
       <div className="relative z-10 flex flex-col items-start">
-        <h1 className="text-4xl font-extrabold mb-3 text-white/80 tracking-tight">
+        <h1 className="text-4xl font-extrabold mb-3 text-white tracking-tight">
           Energy Wise <Zap className="inline-block w-7 h-7 ml-2 text-yellow-300 drop-shadow-glow" />
         </h1>
-        <span className="text-base font-light text-white/70 drop-shadow">
+        <span className="text-base font-light text-white drop-shadow">
           Track the variable cost of energy and gas in the Netherlands
         </span>
       </div>
@@ -92,7 +91,7 @@ function renderCharts(
 )
 {
   return (
-    <main className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 p-4 sm:p-8 mx-auto w-full">
+    <main className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-3 p-4 sm:p-8 mx-auto w-full">
       <div>
         <ChartAreaInteractive
           chartData={energyPricesData.prices}
@@ -130,7 +129,6 @@ export default async function Home()
   return (
     <div className="bg-background text-foreground">
       {renderHeader()}
-      <ThemeToggler />
       {renderCharts(energyPricesData, gasPricesData, sunData, chartConfig)}
     </div>
   );

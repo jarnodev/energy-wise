@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import Markdown from "react-markdown";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
@@ -54,7 +55,7 @@ export default function AiSummaryCard()
     return (
         <Card className="w-full mx-auto my-8">
             <CardHeader>
-                <CardTitle>AI Energy Summary</CardTitle>
+                <CardTitle>AI Summary</CardTitle>
             </CardHeader>
             <CardContent>
                 {error && <div className="text-destructive mb-2">{error}</div>}
@@ -62,7 +63,7 @@ export default function AiSummaryCard()
                     <Markdown>{summary}</Markdown>
                 ) : (
                     <div className="text-muted-foreground text-sm mb-2">
-                        Click the button below to generate a summary of your latest energy, gas, and sun data.
+                        Click the button below to generate a summary of the latest energy, gas, and sun pricing/data.
                     </div>
                 )}
             </CardContent>

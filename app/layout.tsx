@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import "./globals.css";
 import { ThemeProvider } from "../components/theme-provider";
 import Footer from "../components/footer";
+import { ThemeToggler } from "@/components/theme-toggler";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,6 +25,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <div className="flex-1 flex flex-col">{children}</div>
+          <ThemeToggler />
         </ThemeProvider>
         <Footer />
       </body>

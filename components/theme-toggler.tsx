@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useTheme } from "./theme-provider";
 import { Sun, Moon, Monitor, Check } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import
 {
     DropdownMenu,
@@ -11,8 +11,8 @@ import
     DropdownMenuTrigger,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-} from "./ui/dropdown-menu";
-import { cn } from "../lib/utils";
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 export function ThemeToggler()
 {
