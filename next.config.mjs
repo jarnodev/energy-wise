@@ -1,7 +1,10 @@
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  // Separate output for `next dev`, so a running dev server can't mix files into a production build
+  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
+};
 
 export default nextConfig;
 
