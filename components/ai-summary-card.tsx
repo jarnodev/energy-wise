@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Markdown from "react-markdown";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { amsterdamDayOffset } from "@/lib/dates";
 
 export default function AiSummaryCard()
 {
@@ -17,14 +18,9 @@ export default function AiSummaryCard()
         setError(null);
         setSummary(null);
         try {
-            // FromDate defautl to 30 days ago, TillDate default to today
-            const fromDate = new Date();
-            fromDate.setDate(fromDate.getDate() - 30);
-            const tillDate = new Date();
-            tillDate.setDate(tillDate.getDate() + 1);
-            tillDate.setHours(23, 59, 59, 999);
-            const formattedFromDate = fromDate.toISOString().split("T")[0];
-            const formattedTillDate = tillDate.toISOString().split("T")[0];
+            // Last 30 days up to and including tomorrow, in Dutch local time
+            const formattedFromDate = amsterdamDayOffset(-29);
+            const formattedTillDate = amsterdamDayOffset(1);
 
             const res = await fetch("/api/ai-summary", {
                 method: "POST", body: JSON.stringify({

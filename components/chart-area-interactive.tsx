@@ -28,6 +28,7 @@ import
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { amsterdamDay, amsterdamDayOffset, TIME_ZONE } from '@/lib/dates'
 
 export interface ChartAreaInteractiveProps
 {
@@ -40,42 +41,41 @@ export interface ChartAreaInteractiveProps
 function getFilteredData(chartData: Array<{ date: string;[value: string]: number | string }>, timeRange: string)
 {
     if (!chartData.length) return [];
-    const referenceDate = new Date(chartData[chartData.length - 1]?.date || Date.now());
-    const today = new Date();
-    const getDateOnly = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    // Compare calendar days in Dutch local time, so server and browser render the same result
+    const singleDay: Record<string, number> = { "0d": 0, "1d": -1, "-1d": 1 };
 
-    return chartData.filter((item) =>
-    {
-        const date = new Date(item.date);
-        switch (timeRange) {
-            case "0d": {
-                // Today
-                return getDateOnly(date).getTime() === getDateOnly(today).getTime();
-            }
-            case "1d": {
-                // Yesterday
-                const yesterday = new Date(today);
-                yesterday.setDate(today.getDate() - 1);
-                return getDateOnly(date).getTime() === getDateOnly(yesterday).getTime();
-            }
-            case "-1d": {
-                // Tomorrow
-                const tomorrow = new Date(today);
-                tomorrow.setDate(today.getDate() + 1);
-                return getDateOnly(date).getTime() === getDateOnly(tomorrow).getTime();
-            }
-            case "7d":
-            case "30d": {
-                // Last 7 or 30 days
-                const daysToSubtract = timeRange === "7d" ? 7 : 30;
-                const startDate = new Date(referenceDate);
-                startDate.setDate(referenceDate.getDate() - daysToSubtract);
-                return date >= startDate;
-            }
-            default:
-                return true;
-        }
-    });
+    if (timeRange in singleDay) {
+        const targetDay = amsterdamDayOffset(singleDay[timeRange]);
+        return chartData.filter((item) => amsterdamDay(item.date) === targetDay);
+    }
+
+    if (timeRange === "7d" || timeRange === "30d") {
+        // Last 7 or 30 days, counted back from the latest data point
+        const daysToSubtract = timeRange === "7d" ? 7 : 30;
+        const referenceDate = new Date(chartData[chartData.length - 1].date);
+        const startTime = referenceDate.getTime() - daysToSubtract * 24 * 60 * 60 * 1000;
+        return chartData.filter((item) => new Date(item.date).getTime() >= startTime);
+    }
+
+    return chartData;
+}
+
+function formatTick(value: string | number, timeRange: string)
+{
+    const date = new Date(value)
+    if (timeRange === "0d" || timeRange === "1d" || timeRange === "-1d") {
+        return date.toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+            timeZone: TIME_ZONE,
+        })
+    }
+    return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        timeZone: TIME_ZONE,
+    })
 }
 
 export default function ChartAreaInteractive({ chartData, chartConfig, chartName, chartDescription }: ChartAreaInteractiveProps)
@@ -149,41 +149,13 @@ export default function ChartAreaInteractive({ chartData, chartConfig, chartName
                             axisLine={false}
                             tickMargin={8}
                             minTickGap={32}
-                            tickFormatter={(value) =>
-                            {
-                                const date = new Date(value)
-                                if (timeRange === "0d" || timeRange === "1d" || timeRange === "-1d") {
-                                    return date.toLocaleTimeString("en-GB", {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                        hour12: false,
-                                    })
-                                }
-                                return date.toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                })
-                            }}
+                            tickFormatter={(value) => formatTick(value, timeRange)}
                         />
                         <ChartTooltip
                             cursor={false}
                             content={
                                 <ChartTooltipContent
-                                    labelFormatter={(value) =>
-                                    {
-                                        const date = new Date(value)
-                                        if (timeRange === "0d" || timeRange === "1d" || timeRange === "-1d") {
-                                            return date.toLocaleTimeString("en-GB", {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                hour12: false,
-                                            })
-                                        }
-                                        return date.toLocaleDateString("en-US", {
-                                            month: "short",
-                                            day: "numeric",
-                                        })
-                                    }}
+                                    labelFormatter={(value) => formatTick(value, timeRange)}
                                     indicator="dot"
                                 />
                             }

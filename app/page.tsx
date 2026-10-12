@@ -1,51 +1,28 @@
 import ChartAreaInteractive from "@/components/chart-area-interactive";
 import { ChartConfig } from "@/components/ui/chart";
 import { Zap } from "lucide-react";
+import { amsterdamDayOffset } from "@/lib/dates";
+import { getPrices, getSunshine } from "@/lib/energy-data";
 
-export const runtime = "edge";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "";
+// Prices change daily and the date range depends on today, so always render on request
+export const dynamic = "force-dynamic";
 
 const defaultDates = () =>
 {
-  const fromDate = new Date();
-  fromDate.setDate(fromDate.getDate() - 30);
-  const tillDate = new Date();
-  tillDate.setDate(tillDate.getDate() + 1);
-  tillDate.setHours(23, 59, 59, 999);
+  // Last 30 days up to and including tomorrow, as calendar days in Dutch local time
   return {
-    formattedFromDate: fromDate.toISOString().split("T")[0],
-    formattedTillDate: tillDate.toISOString().split("T")[0],
+    formattedFromDate: amsterdamDayOffset(-29),
+    formattedTillDate: amsterdamDayOffset(1),
   };
 }
 
-async function fetchChartData(fromDate: string, tillDate: string): Promise<{
-  energyPricesData: { prices: Array<{ date: string; value: number }> };
-  gasPricesData: { prices: Array<{ date: string; value: number }> };
-  sunData: { sunshineDurations: Array<{ readingDate: string; duration: number }> };
-}>
+async function fetchChartData(fromDate: string, tillDate: string)
 {
-  const [energyPricesResponse, gasPricesResponse, sunResponse] = await Promise.all([
-    fetch(`${API_BASE_URL}/api/energy`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fromDate, tillDate, interval: 4, vat: true }),
-    }),
-    fetch(`${API_BASE_URL}/api/gas`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fromDate, tillDate, interval: 4, vat: true }),
-    }),
-    fetch(`${API_BASE_URL}/api/sun`, { method: "GET" }),
+  const [energyPricesData, gasPricesData, sunData] = await Promise.all([
+    getPrices("energy", { fromDate, tillDate, interval: 4, vat: true }),
+    getPrices("gas", { fromDate, tillDate, interval: 4, vat: true }),
+    getSunshine(),
   ]);
-
-  if (!energyPricesResponse.ok || !gasPricesResponse.ok || !sunResponse.ok) {
-    throw new Error("Failed to fetch data");
-  }
-
-  const energyPricesData = await energyPricesResponse.json() as { prices: Array<{ date: string; value: number }> };
-  const gasPricesData = await gasPricesResponse.json() as { prices: Array<{ date: string; value: number }> };
-  const sunData = await sunResponse.json() as { sunshineDurations: Array<{ readingDate: string; duration: number }> };
   return { energyPricesData, gasPricesData, sunData };
 }
 
