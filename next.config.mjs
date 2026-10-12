@@ -5,5 +5,9 @@ const nextConfig = {};
 
 export default nextConfig;
 
-// Makes Cloudflare bindings available during local development with `next dev`
-initOpenNextCloudflareForDev();
+// Makes Cloudflare bindings available during local development with `next dev`.
+// Remote bindings (Workers AI) are skipped so local work doesn't need a Cloudflare login;
+// the daily summary falls back to a template without AI.
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev({ remoteBindings: false });
+}
