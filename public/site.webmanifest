@@ -13,7 +13,11 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ffffff",
+    "theme_color": "#09090b",
     "background_color": "#ffffff",
-    "display": "standalone"
+    "display": "standalone",
+    "description": "Wanneer is stroom goedkoop? Dynamische prijzen, goedkoopste uren en meldingen.",
+    "start_url": "/",
+    "scope": "/",
+    "lang": "nl"
 }

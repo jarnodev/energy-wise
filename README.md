@@ -1,67 +1,76 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`c3`](https://developers.cloudflare.com/pages/get-started/c3).
+# Energy Wise
 
-## Getting Started
+When is electricity cheap? Energy Wise shows Dutch dynamic electricity and gas prices and helps you act on them:
 
-First, run the development server:
+- **Now & cheapest moment**: the current price and the cheapest block of 1–4 hours, today and tomorrow
+- **All-in prices**: market price + energy tax + your supplier's markup, with or without VAT
+- **Quarter-hour prices** for today and tomorrow, 30-day history and gas prices per gas day
+- **Solar**: expected production for your postcode and panels, best hours for own use and the value of self-consumption once net metering ends (1 January 2027)
+- **Calculators**: dynamic vs. fixed contract over the past year, EV charging planner, home battery simulation
+- **Notifications** (Web Push), a **calendar feed** with the cheapest hours and an **open JSON API** for Home Assistant
+- A **daily summary** written by Workers AI
+
+Built with Next.js 15, deployed as a Cloudflare Worker via [OpenNext](https://opennext.js.org/cloudflare), with D1 for storage and a cron trigger for background jobs.
+
+## How it works
+
+| Part | Where |
+|------|-------|
+| Price sources (EnergyZero) | `lib/energyzero.ts` |
+| Storage and backfilling in D1 | `lib/price-store.ts`, `migrations/` |
+| Reading prices in pages and routes | `lib/prices.ts` |
+| Price math, cheapest blocks, planners | `lib/pricing.ts`, `lib/planner.ts` |
+| Cron jobs: ingest, summary, notifications | `lib/jobs.ts`, `worker.ts` |
+| Web Push (RFC 8291 / RFC 8292 on WebCrypto) | `lib/webpush.ts`, `public/sw.js` |
+| UI | `components/energy/` |
+
+The cron runs every hour at :45. It stores new prices (tomorrow's appear around 13:00), backfills up to 400 days of history in small steps, writes tomorrow's summary and sends notifications.
+
+## Local development
 
 ```bash
+npm install
+npx wrangler d1 migrations apply energy-wise --local   # create the local database
+node scripts/generate-vapid-keys.mjs >> .dev.vars      # optional: enables notifications locally
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.dev.vars` should also contain `NEXTJS_ENV=development`. Without a database, pages fetch prices live.
 
-## Cloudflare integration
+To test in the Workers runtime, including the cron handler:
 
-Besides the `dev` script mentioned above `c3` has added a few extra scripts that allow you to integrate the application with the [Cloudflare Pages](https://pages.cloudflare.com/) environment, these are:
-  - `pages:build` to build the application for Pages using the [`@cloudflare/next-on-pages`](https://github.com/cloudflare/next-on-pages) CLI
-  - `preview` to locally preview your Pages application using the [Wrangler](https://developers.cloudflare.com/workers/wrangler/) CLI
-  - `deploy` to deploy your Pages application using the [Wrangler](https://developers.cloudflare.com/workers/wrangler/) CLI
+```bash
+npx opennextjs-cloudflare build
+npx wrangler dev --local --test-scheduled
+curl "http://localhost:8787/__scheduled?cron=45+*+*+*+*"
+```
 
-> __Note:__ while the `dev` script is optimal for local development you should preview your Pages application as well (periodically or before deployments) in order to make sure that it can properly work in the Pages environment (for more details see the [`@cloudflare/next-on-pages` recommended workflow](https://github.com/cloudflare/next-on-pages/blob/main/internal-packages/next-dev/README.md#recommended-development-workflow))
+Workers AI only runs remotely; locally the summary falls back to a template.
 
-### Bindings
+## Deploying
 
-Cloudflare [Bindings](https://developers.cloudflare.com/pages/functions/bindings/) are what allows you to interact with resources available in the Cloudflare Platform.
+One-time setup:
 
-You can use bindings during development, when previewing locally your application and of course in the deployed application:
+```bash
+npx wrangler login
+npx wrangler d1 create energy-wise              # put the printed database_id in wrangler.jsonc
+npx wrangler d1 migrations apply energy-wise --remote
+node scripts/generate-vapid-keys.mjs            # put VAPID_PUBLIC_KEY in wrangler.jsonc (vars)
+npx wrangler secret put VAPID_PRIVATE_KEY       # paste the private key
+```
 
-- To use bindings in dev mode you need to define them in the `next.config.js` file under `setupDevBindings`, this mode uses the `next-dev` `@cloudflare/next-on-pages` submodule. For more details see its [documentation](https://github.com/cloudflare/next-on-pages/blob/05b6256/internal-packages/next-dev/README.md).
+Then deploy with `npm run deploy`. Apply new files in `migrations/` with `npx wrangler d1 migrations apply energy-wise --remote` before deploying code that needs them.
 
-- To use bindings in the preview mode you need to add them to the `pages:preview` script accordingly to the `wrangler pages dev` command. For more details see its [documentation](https://developers.cloudflare.com/workers/wrangler/commands/#dev-1) or the [Pages Bindings documentation](https://developers.cloudflare.com/pages/functions/bindings/).
+## API
 
-- To use bindings in the deployed application you will need to configure them in the Cloudflare [dashboard](https://dash.cloudflare.com/). For more details see the  [Pages Bindings documentation](https://developers.cloudflare.com/pages/functions/bindings/).
+All endpoints are public JSON (CORS enabled). Prices are in EUR; `mode=allin|market`, `vat=false`, `markup` (EUR/kWh excl. VAT) and `markup_gas` change how prices are calculated.
 
-#### KV Example
+| Endpoint | Returns |
+|----------|---------|
+| `GET /api/v1/now?hours=2` | Current price, level and the next cheapest block |
+| `GET /api/v1/prices?kind=electricity&from=YYYY-MM-DD&till=YYYY-MM-DD&interval=quarter\|hour` | Prices for up to 400 days |
+| `GET /api/v1/prices?kind=gas` | Gas prices per gas day |
+| `GET /api/calendar?hours=2` | iCalendar feed with the cheapest block per day |
+| `GET /api/summary` | Latest daily summary |
 
-`c3` has added for you an example showing how you can use a KV binding.
-
-In order to enable the example:
-- Search for javascript/typescript lines containing the following comment:
-  ```ts
-  // KV Example:
-  ```
-  and uncomment the commented lines below it (also uncomment the relevant imports).
-- In the `wrangler.jsonc` file add the following configuration line:
-  ```
-  "kv_namespaces": [{ "binding": "MY_KV_NAMESPACE", "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }],
-  ```
-- If you're using TypeScript run the `cf-typegen` script to update the `env.d.ts` file:
-  ```bash
-  npm run cf-typegen
-  # or
-  yarn cf-typegen
-  # or
-  pnpm cf-typegen
-  # or
-  bun cf-typegen
-  ```
-
-After doing this you can run the `dev` or `preview` script and visit the `/api/hello` route to see the example in action.
-
-Finally, if you also want to see the example work in the deployed application make sure to add a `MY_KV_NAMESPACE` binding to your Pages application in its [dashboard kv bindings settings section](https://dash.cloudflare.com/?to=/:account/pages/view/:pages-project/settings/functions#kv_namespace_bindings_section). After having configured it make sure to re-deploy your application.
+Data: [EnergyZero](https://www.energyzero.nl) (prices), [Open-Meteo](https://open-meteo.com) (solar forecast), [PDOK](https://www.pdok.nl) (geocoding).

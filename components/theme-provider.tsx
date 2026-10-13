@@ -1,47 +1,13 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState } from "react";
 
-const ThemeContext = createContext({
-    theme: "system",
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setTheme: (theme: "light" | "dark" | "system") => { },
-});
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
+// Applies the theme class before the page paints, so there is no flash of the wrong theme
 export function ThemeProvider({ children }: { children: React.ReactNode })
 {
-    const [theme, setThemeState] = useState<"light" | "dark" | "system">("system");
-
-    useEffect(() =>
-    {
-        // Load theme from localStorage
-        const stored = localStorage.getItem("theme");
-        if (stored === "light" || stored === "dark" || stored === "system") {
-            setThemeState(stored);
-        }
-    }, []);
-
-    useEffect(() =>
-    {
-        let appliedTheme = theme;
-        if (theme === "system") {
-            const mq = window.matchMedia("(prefers-color-scheme: dark)");
-            appliedTheme = mq.matches ? "dark" : "light";
-        }
-        document.documentElement.classList.remove("light", "dark");
-        document.documentElement.classList.add(appliedTheme);
-        localStorage.setItem("theme", theme);
-    }, [theme]);
-
-    const setTheme = (t: "light" | "dark" | "system") => setThemeState(t);
-
     return (
-        <ThemeContext.Provider value={{ theme, setTheme }}>
+        <NextThemesProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             {children}
-        </ThemeContext.Provider>
+        </NextThemesProvider>
     );
-}
-
-export function useTheme()
-{
-    return useContext(ThemeContext);
 }

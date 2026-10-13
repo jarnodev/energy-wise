@@ -1,14 +1,41 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "energy-wise",
-	"main": ".open-next/worker.js",
+	"main": "worker.ts",
 	"compatibility_date": "2026-10-01",
-	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	// Keeping function names adds __name() calls, which break inline scripts that next-themes serializes from functions
+	"keep_names": false,
 	"assets": {
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"
 	},
 	"observability": {
 		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "energy-wise",
+			"database_id": "e6740ff3-dbf1-47b6-9520-0e1deaee3093",
+			"migrations_dir": "migrations"
+		}
+	],
+	"ai": {
+		"binding": "AI"
+	},
+	"triggers": {
+		// Every hour at :45: store new prices, backfill history, send push alerts, write the daily summary
+		"crons": [
+			"45 * * * *"
+		]
+	},
+	"vars": {
+		"VAPID_SUBJECT": "https://github.com/jarnodev",
+		// Public half of the VAPID key pair, generate with `node scripts/generate-vapid-keys.mjs`
+		"VAPID_PUBLIC_KEY": "BCb0FFcQa2T7Ln42KTWRWC0yX-HI79NT9Jvj4zVqO7zNJ_10qVUuJtl9GyNG5ByijVno2LnYQO1f_ZpZD3eGHIg"
 	}
 }

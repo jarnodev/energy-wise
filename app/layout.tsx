@@ -1,15 +1,13 @@
-import type { Metadata } from "next";
-import { Inter } from 'next/font/google'
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "../components/theme-provider";
-import Footer from "../components/footer";
-import { ThemeToggler } from "@/components/theme-toggler";
+import { ThemeProvider } from "@/components/theme-provider";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Energy Wise",
-  description: "Track the variable cost of energy and gas in the Netherlands",
+  title: "Energy Wise – wanneer is stroom goedkoop?",
+  description: "Dynamische stroom- en gasprijzen in Nederland: de goedkoopste uren, je echte all-in prijs, zonne-opbrengst en meldingen.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -21,6 +19,13 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,15 +33,9 @@ export default function RootLayout({
 }>)
 {
   return (
-    <html lang="en">
-      <body
-        className={`${inter.className} antialiased min-h-screen flex flex-col`}
-      >
-        <ThemeProvider>
-          <div className="flex-1 flex flex-col">{children}</div>
-          <ThemeToggler />
-        </ThemeProvider>
-        <Footer />
+    <html lang="nl" suppressHydrationWarning>
+      <body className={`${inter.variable} font-sans antialiased min-h-screen`}>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

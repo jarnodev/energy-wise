@@ -6,8 +6,15 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --color-level-negative: var(--level-negative);
+  --color-level-cheap: var(--level-cheap);
+  --color-level-normal: var(--level-normal);
+  --color-level-expensive: var(--level-expensive);
+  --color-solar: var(--solar);
+  --color-series: var(--series);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -76,6 +83,15 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+  /* Price levels: diverging blue (cheap) <-> red (expensive) around a neutral gray */
+  --level-negative: #1c5cab;
+  --level-cheap: #5598e7;
+  --level-normal: #a8a69c;
+  --level-expensive: #e34948;
+  --solar: #eda100;
+  --series: #2a78d6;
+  --chart-grid: #e1e0d9;
+  --chart-axis: #898781;
 }
 
 .dark {
@@ -110,6 +126,14 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
+  --level-negative: #86b6ef;
+  --level-cheap: #3987e5;
+  --level-normal: #6b6a64;
+  --level-expensive: #e66767;
+  --solar: #c98500;
+  --series: #3987e5;
+  --chart-grid: #2c2c2a;
+  --chart-axis: #898781;
 }
 
 @layer base {
@@ -118,5 +142,9 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
   }
 }

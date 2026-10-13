@@ -51,3 +51,19 @@ export function amsterdamEndOfDay(day: string): Date
 {
 	return new Date(amsterdamStartOfDay(amsterdamDayOffset(1, amsterdamStartOfDay(day))).getTime() - 1);
 }
+
+const hourFormatter = new Intl.DateTimeFormat("en-GB", { timeZone: TIME_ZONE, hour: "2-digit", hourCycle: "h23" });
+
+// Hour of the day (0-23) of the given instant in Amsterdam
+export function amsterdamHour(date: Date | string | number = new Date()): number
+{
+	return Number(hourFormatter.format(new Date(date)));
+}
+
+const timeFormatter = new Intl.DateTimeFormat("nl-NL", { timeZone: TIME_ZONE, hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+
+// Time of day (HH:MM) of the given instant in Amsterdam
+export function amsterdamTime(date: Date | string | number): string
+{
+	return timeFormatter.format(new Date(date));
+}
